@@ -1,40 +1,44 @@
 import json
 import math
 
-def load_signal_from_json(json_string):
+def carga_signal_json(json_string):
     data = json.loads(json_string)
     # Aseguramos que los valores de la señal sean flotantes
     return [float(value) for value in data["signal"].split(",")]
 
-def Direct_transform(signal):
+def Transformada_discreta_directa(signal):
     N = len(signal)
-    coefficients = []  
-    dft_result = []
+    coeficientes = []  
+    magnitudft = []
     for k in range(N):
         real = sum(signal[n] * math.cos(-2 * math.pi * k * n / N) for n in range(N))
         imag = sum(signal[n] * math.sin(-2 * math.pi * k * n / N) for n in range(N))
-        coefficients.append((real, imag))  # Guardamos los coeficientes complejos de fourier en la lista
+        coeficientes.append((real, imag))  # Guardamos los coeficientes complejos de fourier en la lista
         magnitude = math.sqrt(real**2 + imag**2)  # Calculamos la magnitud de la frecuencia utulizando los coeficientes
-        dft_result.append(magnitude) # Guardamos las magnitudes calculadas en la lista
-    return coefficients, dft_result
+        magnitudft.append(magnitude) # Guardamos las magnitudes calculadas en la lista
+    return coeficientes, magnitudft
 
-def inverse_transform(coefficients):
-    N = len(coefficients)
-    reconstructed_signal = []
+def Transformada_inversa(coeficientes):
+   #Hacemos la sumatoria con los coeficientes calculados en la funcion de transformada directa
+    N = len(coeficientes)
+    reconstruccion = []
     for n in range(N):
         sum_real = sum(coeff[0] * math.cos(2 * math.pi * k * n / N) - coeff[1] * math.sin(2 * math.pi * k * n / N) for k, coeff in enumerate(coefficients))
-        reconstructed_signal.append(sum_real / N)  # Dividir por N para la normalización
-    return reconstructed_signal
+        reconstruccion.append(sum_real / N)  # Dividir por N para la normalización
+    return reconstruccion
 
 def lambda_handler(event, context):
     json_string = event["json_string"]
     
-    signal = load_signal_from_json(json_string)
-    #coefficients, dft_magnitude = Direct_transform(signal)
-    #reconstructed_signal = inverse_transform(coefficients)  
+    signal = carga_signal_json(json_string)
+    coeficientes, magnitud = Transformada_discreta_directa(signal)
+    reconstruccion = Transformada_inversa(coeficientes)  
     return {
-        "dft_magnitude": dft_magnitude,
-        "coeficientes": coefficients,
-        "reconstructed_signal": reconstructed_signal  # Señal reconstruida
+        "MAGNITUD": magnitud,
+        "COEFICIENTES": coeficientes,
+        "RECONSTRUCCIÓN": reconstruccion  # Señal reconstruida
+        #"signal": signal
 
     }
+
+
