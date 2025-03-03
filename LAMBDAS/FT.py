@@ -69,10 +69,6 @@ def lambda_handler(event, context):
     
     response_payload = json.load(response['Payload'])
 
-    # Validación de la clave "coef_filtrados"
-    if "coef_filtrados" not in response_payload:
-        return {"error": "La respuesta de FILTROS no contiene 'coef_filtrados'", "response_payload": response_payload}
-
     coef_filtrados = response_payload["coef_filtrados"]
     reconstruccion = Transformada_inversa(coef_filtrados)
 
